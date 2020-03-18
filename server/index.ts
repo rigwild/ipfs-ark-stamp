@@ -1,21 +1,50 @@
 import express from 'express'
-import bodyParser from 'body-parser'
-import ipfsHttpClient from 'ipfs-http-client'
+const ipfsHttpClient = require('ipfs-http-client')
+
+import { initArkCryptoLib } from './ark'
+import { errorHandler } from './middlewares'
+import { SERVER_PORT, IPFS_NODE_MULTIADDR, FILE_UPLOAD_MAX_SIZE, tempDocumentUploadDir } from './config'
 
 // Connect to IPFS daemon with multiaddr
-const ipfs = ipfsHttpClient('/ip4/127.0.0.1/tcp/6543')
+const ipfs = ipfsHttpClient(IPFS_NODE_MULTIADDR)
 
 const app = express()
 
 // Parse JSON body
-app.use(bodyParser.json())
+app.use(express.json())
+
+// Use gzip compression to improve performance
+app.use(require('compression')())
+
+// Enhance the app security by setting some HTTP headers
+app.use(require('helmet')())
+
+// Handle file upload
+app.use(
+  require('express-fileupload')({
+    abortOnLimit: true,
+    useTempFiles: true,
+    tempFileDir: tempDocumentUploadDir,
+    limits: { fileSize: FILE_UPLOAD_MAX_SIZE },
+    createParentPath: true,
+    safeFileNames: true,
+    preserveExtension: true
+  })
+)
 
 app.get('/ipfs/version', async (req, res) => {
   res.json(await ipfs.version())
 })
 
 app.get('/ipfs/stampedFiles', async (req, res) => {
-  let files = {}
+  let files: {
+    [cid: string]: {
+      fullName: string
+      size: number
+      cid: string
+      pinned: boolean
+    }
+  } = {}
   for await (const aFile of ipfs.files.ls('/stamped')) {
     const cid = aFile.cid.toString()
     // Ignore directories and duplicates names (will take the first file name if duplicates)
@@ -82,19 +111,31 @@ app.patch('/ipfs/stampedFiles/:cid/pinState', async (req, res) => {
 
 app.use('/', express.static('public'))
 
-// Check the `/stamped` file exists and is a directory before starting the server
-// Will create it if it does not exist
-ipfs.files
-  .stat('/stamped')
-  .catch(async err => {
-    if (err.message === 'file does not exist') {
-      // The directory does not exist, create it
-      await ipfs.files.mkdir('/stamped')
-      return ipfs.files.stat('/stamped')
-    } else throw err
-  })
-  .then(stat => {
-    // Check the `/stamped` file is a directory
-    if (stat.type !== 'directory') throw new Error('The `/stamped` IPFS node file is not a directory.')
-  })
-  .then(() => app.listen(3000, () => console.log('Server is listening on http://localhost:3000/')))
+// Error handler
+app.use(errorHandler)
+
+const setup = async () => {
+  // Check the `/stamped` file exists and is a directory before starting the server
+  // Will create it if it does not exist
+  await ipfs.files
+    .stat('/stamped')
+    .catch(async (err: any) => {
+      if (err.message === 'file does not exist') {
+        // The directory does not exist, create it
+        await ipfs.files.mkdir('/stamped')
+        return ipfs.files.stat('/stamped')
+      } else throw err
+    })
+    .then((stat: any) => {
+      // Check the `/stamped` file is a directory
+      if (stat.type !== 'directory') throw new Error('The `/stamped` IPFS node file is not a directory.')
+    })
+
+  // Configure the ARK crypto lib
+  await initArkCryptoLib()
+
+  // Start the HTTP server
+  app.listen(SERVER_PORT, () => console.log(`Server is listening on http://localhost:${SERVER_PORT}/`))
+}
+
+setup()

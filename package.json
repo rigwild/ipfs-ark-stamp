@@ -1,10 +1,22 @@
 {
   "name": "ipfs-ark-stamp",
+  "description": "📝 Add files to IPFS and stamp its IPFS CID hash permanently on the ARK Blockchain",
+  "keywords": [
+    "ipfs",
+    "ipfs-hash",
+    "stamp",
+    "ark",
+    "ark-blockchain",
+    "blockchain",
+    "webapp"
+  ],
   "version": "0.1.0",
   "private": true,
-  "main": "index.js",
-  "author": "rigwild <me@rigwild.dev> (https://rigwild.dev/)",
-  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "directories": {
+    "lib": "./server"
+  },
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc",
@@ -29,5 +41,7 @@
     "@types/hapi__boom": "^9.0.1",
     "@types/orbit-db": "https://github.com/orbitdb/orbit-db-types.git",
     "typescript": "^3.8.3"
-  }
+  },
+  "author": "rigwild <me@rigwild.dev> (https://rigwild.dev/)",
+  "license": "MIT"
 }

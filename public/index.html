@@ -21,7 +21,7 @@
               <h3>Add a new file</h3>
               <form @submit.prevent="addNewFile">
                 <b-form-group label-for="document">
-                  <template #label>Document - Max size : 20 MB</template>
+                  <template #label>Document - Max file size: 20 MB</template>
                   <b-form-file
                     v-model="newDocument"
                     id="document"

@@ -35,6 +35,15 @@ new Vue({
   },
 
   methods: {
+    /**
+     *
+     * @param {string} route API route
+     * @param {'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'} [method = 'GET'] HTTP method
+     * @param {object} [body] Request body, will be stringified if object
+     * @param {{ [header: string]: string }} [headers = {}] Request headers
+     * @param {object} [options = {}] Any fetch options to inject
+     * @param {boolean} [isJsonBody = true] Is the request body JSON
+     */
     apiCall(route, method = 'GET', body, headers = {}, options = {}, isJsonBody = true) {
       return fetch(route, {
         method,

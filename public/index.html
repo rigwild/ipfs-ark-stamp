@@ -50,12 +50,32 @@
             >{{ stampedFilesTableMessage }}</b-alert
           >
 
-          <b-overlay :show="stampedFilesTableState === 'loading'" rounded="sm">
+          <b-overlay :show="stampedFilesTableStateIsLoading" rounded="sm">
             <div class="card mt-2">
               <div class="card-header">
                 Stamped files (/stamped)
-                <b-button @click="loadIpfsStampedFiles" size="sm" variant="primary" class="ml-2">
+
+                <b-badge pill variant="info">{{ ipfs.stampedFiles.length }} files</b-badge>
+                <b-badge pill variant="info">{{ stampedFilesPinnedCount }} pinned</b-badge>
+                <b-badge pill variant="info">{{ stampedFilesStampedCount }} stamped</b-badge>
+
+                <b-button
+                  @click="loadIpfsStampedFiles"
+                  size="sm"
+                  variant="primary"
+                  class="ml-2"
+                  :disabled="stampedFilesTableStateIsLoading"
+                >
                   Refresh
+                </b-button>
+                <b-button
+                  @click="synchronizeIpfsDb"
+                  size="sm"
+                  variant="light"
+                  class="ml-2"
+                  :disabled="stampedFilesTableStateIsLoading"
+                >
+                  Synchronize IPFS database
                 </b-button>
               </div>
               <b-table
@@ -73,6 +93,12 @@
                   { key: 'delete', label: 'Delete', class: 'text-center align-middle' }
                 ]"
               >
+                <template v-slot:cell(fullName)="row">
+                  <span :title="row.item.fullName">
+                    {{ row.item.fullName.length > 20 ? `${row.item.fullName.slice(0, 20)}...` : row.item.fullName }}
+                  </span>
+                </template>
+
                 <template v-slot:cell(cid)="row">
                   <a
                     :href="`https://gateway.pinata.cloud/ipfs/${row.item.cid}`"

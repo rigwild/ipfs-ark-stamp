@@ -2,8 +2,7 @@ new Vue({
   el: '#app',
   data() {
     return {
-      // 'ready' | 'loading'
-      stampedFilesTableState: 'ready',
+      stampedFilesTableStateIsLoading: false,
       stampedFilesTableMessage: null,
 
       newDocument: null,
@@ -20,7 +19,13 @@ new Vue({
 
   computed: {
     stampedFilesCount() {
-      return this.ipfs.stampedFiles.length
+      return this.ipfs.stampedFiles ? this.ipfs.stampedFiles.length : 0
+    },
+    stampedFilesPinnedCount() {
+      return this.ipfs.stampedFiles ? this.ipfs.stampedFiles.filter(x => x.pinned).length : 0
+    },
+    stampedFilesStampedCount() {
+      return this.ipfs.stampedFiles ? this.ipfs.stampedFiles.filter(x => x.stamped).length : 0
     }
   },
 
@@ -80,14 +85,14 @@ new Vue({
       this.ipfs.nodeVersion = await this.apiCall('/ipfs/version')
     },
     async loadIpfsStampedFiles() {
-      this.stampedFilesTableState = 'loading'
+      this.stampedFilesTableStateIsLoading = true
       try {
         this.ipfs.stampedFiles = await this.apiCall('/ipfs/stampedFiles')
       } catch (error) {
         console.error(error)
         this.stampedFilesTableMessage = error.message
       } finally {
-        this.stampedFilesTableState = 'ready'
+        this.stampedFilesTableStateIsLoading = false
       }
     },
 
@@ -102,7 +107,7 @@ new Vue({
       )
         return
 
-      this.stampedFilesTableState = 'loading'
+      this.stampedFilesTableStateIsLoading = true
 
       try {
         // Remove the file from the IPFS node
@@ -114,7 +119,7 @@ new Vue({
         console.error(error)
         this.stampedFilesTableMessage = error.message
       } finally {
-        this.stampedFilesTableState = 'ready'
+        this.stampedFilesTableStateIsLoading = false
       }
     },
 
@@ -129,7 +134,7 @@ new Vue({
       )
         return
 
-      this.stampedFilesTableState = 'loading'
+      this.stampedFilesTableStateIsLoading = true
 
       try {
         // Toggle the pin state from the IPFS node
@@ -141,7 +146,7 @@ new Vue({
         console.error(error)
         this.stampedFilesTableMessage = error.message
       } finally {
-        this.stampedFilesTableState = 'ready'
+        this.stampedFilesTableStateIsLoading = false
       }
     },
 
@@ -174,7 +179,7 @@ new Vue({
       )
         return
 
-      this.stampedFilesTableState = 'loading'
+      this.stampedFilesTableStateIsLoading = true
       try {
         // Broadcast the IPFS CID on the ARK Blockchain
         await this.apiCall(`/ark/broadcastCid/${cid}`, 'POST')
@@ -186,7 +191,32 @@ new Vue({
         console.error(error)
         this.stampedFilesTableMessage = error.message
       } finally {
-        this.stampedFilesTableState = 'ready'
+        this.stampedFilesTableStateIsLoading = false
+      }
+    },
+
+    async synchronizeIpfsDb() {
+      if (
+        !confirm(
+          `Are you sure you want to synchronize the IPFS database with the ARK blockchain IPFS CIDs ?\n\n` +
+            `WARNING: This may take some time.`
+        )
+      )
+        return
+
+      this.stampedFilesTableStateIsLoading = true
+      try {
+        // Broadcast the IPFS CID on the ARK Blockchain
+        await this.apiCall('/ipfs/stampedFiles/synchronizeDb', 'POST')
+
+        // Reload the files list
+        await this.loadIpfsStampedFiles()
+        this.stampedFilesTableMessage = null
+      } catch (error) {
+        console.error(error)
+        this.stampedFilesTableMessage = error.message
+      } finally {
+        this.stampedFilesTableStateIsLoading = false
       }
     }
   }

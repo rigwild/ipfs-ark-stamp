@@ -8,6 +8,7 @@ Uses an [OrbitDB](https://github.com/orbitdb/orbit-db) log instance on the IPFS 
  - Stamp the IPFS file CID hash on the [ARK Blockchain](https://ark.io/)
  - Open the IPFS stamp transaction on the [ARK Blockchain Explorer](https://explorer.ark.io/)
  - Store the ARK Blockchain IPFS stamp transaction ID on the IPFS node using [OrbitDB](https://github.com/orbitdb/orbit-db)
+ - Synchronize the local [OrbitDB](https://github.com/orbitdb/orbit-db) store with the already-broadcasted ARK Blockchain IPFS CIDs
 
 ## Install
 ```sh

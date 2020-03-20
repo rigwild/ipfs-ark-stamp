@@ -35,6 +35,14 @@ new Vue({
   },
 
   methods: {
+    /** Custom sorting for the stamped files table */
+    stampedFilesTableCustomSort(a, b, key) {
+      if (key === 'pin') return a.pinned && !b.pinned ? 1 : -1
+      else if (key === 'ark') return a.stamped && !b.stamped ? 1 : -1
+      // Let b-table handle the sorting
+      return false
+    },
+
     /**
      *
      * @param {string} route API route
@@ -101,6 +109,7 @@ new Vue({
         await this.apiCall(`/ipfs/stampedFiles/${cid}`, 'DELETE')
         // Remove the file from the local state
         this.ipfs.stampedFiles = this.ipfs.stampedFiles.filter(x => x.cid !== cid)
+        this.stampedFilesTableMessage = null
       } catch (error) {
         console.error(error)
         this.stampedFilesTableMessage = error.message
@@ -127,6 +136,7 @@ new Vue({
         await this.apiCall(`/ipfs/stampedFiles/${cid}/pinState`, 'PATCH', { newPinState: !pinned })
         // Toggle the pin state from the local state
         this.ipfs.stampedFiles[this.ipfs.stampedFiles.findIndex(x => x.cid === cid)].pinned = !pinned
+        this.stampedFilesTableMessage = null
       } catch (error) {
         console.error(error)
         this.stampedFilesTableMessage = error.message
@@ -146,6 +156,7 @@ new Vue({
 
         // Reload the files list
         await this.loadIpfsStampedFiles()
+        this.stampedFilesTableMessage = null
       } catch (err) {
         console.error(err)
         this.newDocumentMessage = err.message
@@ -165,11 +176,12 @@ new Vue({
 
       this.stampedFilesTableState = 'loading'
       try {
-        // Toggle the stamp state from the IPFS node
+        // Broadcast the IPFS CID on the ARK Blockchain
         await this.apiCall(`/ark/broadcastCid/${cid}`, 'POST')
 
         // Reload the files list
         await this.loadIpfsStampedFiles()
+        this.stampedFilesTableMessage = null
       } catch (error) {
         console.error(error)
         this.stampedFilesTableMessage = error.message

@@ -62,13 +62,14 @@
                 show-empty
                 small
                 stacked="md"
+                :sort-compare="stampedFilesTableCustomSort"
                 :items="ipfs.stampedFiles"
                 :fields="[
                   { key: 'fullName', label: 'Name', sortable: true, class: 'align-middle' },
-                  { key: 'size', label: 'Size', sortable: true, formatter: value=> `${value} MB`, class: 'align-middle' },
-                  { key: 'cid', label: 'CID', sortable: true, formatter: value=> `https://gateway.pinata.cloud/ipfs/${value}`, class: 'align-middle' },
-                  { key: 'pin', label: 'Pin', class: 'text-center align-middle' },
-                  { key: 'ark', label: 'Stamp', class: 'text-center align-middle' },
+                  { key: 'size', label: 'Size', sortable: true, formatter: value => `${value} MB`, class: 'align-middle' },
+                  { key: 'cid', label: 'CID', sortable: true, formatter: value => `https://gateway.pinata.cloud/ipfs/${value}`, class: 'align-middle' },
+                  { key: 'pin', label: 'Pin', sortable: true, class: 'text-center align-middle' },
+                  { key: 'ark', label: 'Stamp', sortable: true, class: 'text-center align-middle' },
                   { key: 'delete', label: 'Delete', class: 'text-center align-middle' }
                 ]"
               >

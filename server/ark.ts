@@ -22,12 +22,19 @@ const getNextNonce = async (walletAddress: string) => {
   return (parseInt(nonce, 10) + 1).toString()
 }
 
-// TODO: Find a way to search an IPFS CID transaction ID
-// Asked on ARK's Slack `help` channel
-// const findIPFSHashTransactionId = (cid: string) => arkApiConnection.api('transactions').search({ type: 5 })
+/** Find a transaction ID having an IPFS CID */
+export const findIPFSHashTransactionId = (cid: string) =>
+  arkApiConnection
+    .api('transactions')
+    .search({ type: 5, asset: { ipfs: cid } })
+    .then(res => {
+      if (res.body.data.length > 0) return res.body.data[0].id
+      throw new Error('The IPFS CID was not found on the ARK Blockchain.')
+    })
 
 /**
  * Build, sign and broadcast a new IPFS transaction on the ARK blockchain
+ *
  * @param cid IPFS content CID
  */
 export const broadcastIPFSTransaction = async (cid: string) =>

@@ -4,7 +4,7 @@ const nanoid = require('nanoid')
 
 import { initIpfsClient, ipfs } from './ipfs'
 import { initOrbitDb, orbitDbStore } from './orbitDb'
-import { initArkCryptoLib, broadcastIPFSTransaction } from './ark'
+import { initArkCryptoLib, broadcastIPFSTransaction, findIPFSHashTransactionId } from './ark'
 import { asyncMiddleware, errorHandler } from './middlewares'
 import { SERVER_PORT, FILE_UPLOAD_MAX_SIZE, IPFS_NODE_STAMPED_DIR, ARK_EXPLORER_URI } from './config'
 
@@ -220,13 +220,16 @@ app.post(
 
         // IPFS CID was already broadcasted on the ARK blockchain, update the database
         if (error.type === 'ERR_APPLY' && error.message.includes('already registered on the blockchain')) {
-          // Update the database so it is in sync with the ARK blockchain state
-          // FIXME: Find the txid
+          // Silently update the database so it is in sync with the ARK blockchain state
+          const txid = await findIPFSHashTransactionId(cid)
           await orbitDbStore.add({
-            arkTransactionId: '',
+            arkTransactionId: txid,
             ipfsCid: cid
           })
-          throw boom.conflict(`The IPFS CID "${cid}" is already broadcasted on the ARK blockchain.`)
+
+          // Don't throw an error, act like it worked
+          // throw boom.conflict(`The IPFS CID "${cid}" is already broadcasted on the ARK blockchain.`)
+          return res.json({ data: { txid } })
         }
         // Unknown error happened
         else throw boom.conflict(error.message)

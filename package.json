@@ -23,7 +23,7 @@
     "dev": "nodemon --exec ts-node server/index.ts --ext ts"
   },
   "dependencies": {
-    "@arkecosystem/client": "^1.1.0",
+    "@arkecosystem/client": "^1.1.1",
     "@arkecosystem/crypto": "^2.6.30",
     "@hapi/boom": "^9.1.0",
     "compression": "^1.7.4",

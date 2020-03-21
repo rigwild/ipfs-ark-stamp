@@ -44,6 +44,56 @@ const removeDuplicatedFiles = async () => {
   return Promise.all(filesToDelete.map(x => ipfs.files.rm(`${IPFS_NODE_STAMPED_DIR}/${x.name}`)))
 }
 
+const synchronizeDb = async () => {
+  // Get all the IPFS node files CIDs in the stamped directory
+  let filesCids = [] as string[]
+  for await (const aFile of ipfs.files.ls(IPFS_NODE_STAMPED_DIR))
+    if (aFile.type === 0) filesCids.push(aFile.cid.toString())
+
+  // Get all the OrbitDB stored IPFS CIDs
+  const stampedCidsInDb = orbitDbStore
+    .iterator({ limit: -1, reverse: true })
+    .collect()
+    .map(x => x.payload.value.ipfsCid)
+
+  // Find the CIDs that are not stored in the OrbitDB database
+  const notStamped = filesCids.filter(x => stampedCidsInDb.indexOf(x) === -1)
+
+  // Split the array into chunks of 3 elements
+  const chunkSize = 3
+  const notStampedChunked = new Array(Math.ceil(notStamped.length / chunkSize))
+    .fill(0)
+    .map((_, i) => notStamped.slice(i * chunkSize, i * chunkSize + chunkSize))
+
+  // Start the syncing process by parallel chunks of 3 searches at a time
+  console.log(`${new Date().toISOString()} - [sync] Started the IPFS-ARK Blockchain synchronization process.`)
+  let requestCount = 0
+  let requestFoundCount = 0
+  for (const aNotStampedChunk of notStampedChunked) {
+    await Promise.all(
+      aNotStampedChunk.map(async aNotStampedCid => {
+        try {
+          requestCount++
+          const txid = await findIPFSHashTransactionId(aNotStampedCid)
+          const dbEntry = { arkTransactionId: txid, ipfsCid: aNotStampedCid }
+          await orbitDbStore.add(dbEntry)
+          requestFoundCount++
+          console.log(
+            `${new Date().toISOString()} - [sync] Found CID ${dbEntry.ipfsCid} at ${ARK_EXPLORER_URI}/transaction/${
+              dbEntry.arkTransactionId
+            }`
+          )
+          return dbEntry
+        } catch {}
+      })
+    )
+  }
+
+  console.log(
+    `${new Date().toISOString()} - [sync] Finished the IPFS-ARK Blockchain synchronization process successfully. Found ${requestFoundCount}/${requestCount} CIDs on the ARK Blockchain that were missing from OrbitDB.`
+  )
+}
+
 // Get the IPFS node version
 app.get(
   '/ipfs/version',
@@ -169,54 +219,7 @@ app.post(
 app.post(
   '/ipfs/stampedFiles/synchronizeDb',
   asyncMiddleware(async (req, res) => {
-    // Get all the IPFS node files CIDs in the stamped directory
-    let filesCids = [] as string[]
-    for await (const aFile of ipfs.files.ls(IPFS_NODE_STAMPED_DIR))
-      if (aFile.type === 0) filesCids.push(aFile.cid.toString())
-
-    // Get all the OrbitDB stored IPFS CIDs
-    const stampedCidsInDb = orbitDbStore
-      .iterator({ limit: -1, reverse: true })
-      .collect()
-      .map(x => x.payload.value.ipfsCid)
-
-    // Find the CIDs that are not stored in the OrbitDB database
-    const notStamped = filesCids.filter(x => stampedCidsInDb.indexOf(x) === -1)
-
-    // Split the array into chunks of 3 elements
-    const chunkSize = 3
-    const notStampedChunked = new Array(Math.ceil(notStamped.length / chunkSize))
-      .fill(0)
-      .map((_, i) => notStamped.slice(i * chunkSize, i * chunkSize + chunkSize))
-
-    // Start the syncing process by parallel chunks of 3 searches at a time
-    console.log(`${new Date().toISOString()} - [sync] Started the IPFS-ARK Blockchain synchronization process.`)
-    let requestCount = 0
-    let requestFoundCount = 0
-    for (const aNotStampedChunk of notStampedChunked) {
-      await Promise.all(
-        aNotStampedChunk.map(async aNotStampedCid => {
-          try {
-            requestCount++
-            const txid = await findIPFSHashTransactionId(aNotStampedCid)
-            const dbEntry = { arkTransactionId: txid, ipfsCid: aNotStampedCid }
-            await orbitDbStore.add(dbEntry)
-            requestFoundCount++
-            console.log(
-              `${new Date().toISOString()} - [sync] Found CID ${dbEntry.ipfsCid} at ${ARK_EXPLORER_URI}/transaction/${
-                dbEntry.arkTransactionId
-              }`
-            )
-            return dbEntry
-          } catch {}
-        })
-      )
-    }
-
-    console.log(
-      `${new Date().toISOString()} - [sync] Finished the IPFS-ARK Blockchain synchronization process successfully. Found ${requestFoundCount}/${requestCount} CIDs on the ARK Blockchain that were missing from OrbitDB.`
-    )
-
+    await synchronizeDb()
     res.status(200).end()
   })
 )
@@ -309,6 +312,9 @@ const setup = async () => {
     initOrbitDb(), // Initialize the Orbit database
     initArkCryptoLib() // Configure the ARK crypto lib
   ])
+
+  // Synchronize the OrbitDB store before starting the server in production mode
+  if (process.env.NODE_ENV === 'production') await synchronizeDb()
 
   // Start the HTTP server
   app.listen(SERVER_PORT, () => console.log(`Server is listening on http://localhost:${SERVER_PORT}/`))

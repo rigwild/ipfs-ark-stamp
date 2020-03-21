@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@arkecosystem/client@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@arkecosystem/client/-/client-1.1.0.tgz#0267ae6c7694e5315268210cb5d56b13dc0a1b3c"
-  integrity sha512-pSgxlkp8HmXi2QTp0Z4yP0La5i0iEFXoAyvujtU1MlsT61gbLuMySYSxgwPPXuY0289r5ax7yET0dVPZk8ZSLQ==
+"@arkecosystem/client@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@arkecosystem/client/-/client-1.1.1.tgz#e52c42d77acd050ccc918997b322075b25204511"
+  integrity sha512-//3n+dVC6i/33VkWhSzhtUKNcLBsl40XsBUzaQX3RNsrQ6WfcAzyLWy2DJ2MOLL/pkuvpOAH7L/1WMd2y5duQg==
   dependencies:
     is-url-superb "^3.0.0"
     ky "^0.19.0"
@@ -157,9 +157,9 @@
   integrity sha512-FwI9gX75FgVBJ7ywgnq/P7tw+/o1GUbtP0KzbtusLigAOgIgNISRK0ZPl4qertvXSIE8YbsVJueQ90cDt9YYyw==
 
 "@types/node@*":
-  version "13.9.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.9.1.tgz#96f606f8cd67fb018847d9b61e93997dabdefc72"
-  integrity sha512-E6M6N0blf/jiZx8Q3nb0vNaswQeEyn0XlupO+xN6DtJ6r6IT4nXrTry7zhIfYvFCl3/8Cu6WIysmUBKiqV0bqQ==
+  version "13.9.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.9.2.tgz#ace1880c03594cc3e80206d96847157d8e7fa349"
+  integrity sha512-bnoqK579sAYrQbp73wwglccjJ4sfRdKU7WNEZ5FW4K2U6Kc0/eZ5kvXG0JKsEKFB50zrFmfFt52/cvBbZa7eXg==
 
 "@types/node@10.12.18":
   version "10.12.18"
@@ -1795,21 +1795,29 @@ multiaddr-to-uri@^5.1.0:
     multiaddr "^7.2.1"
 
 multiaddr@^7.2.1:
-  version "7.4.1"
-  resolved "https://registry.yarnpkg.com/multiaddr/-/multiaddr-7.4.1.tgz#b71cba8629364a35576fda2d01e8d6deca1cbb57"
-  integrity sha512-OK4CMgAwE1TeLw++vdfe8baDYYoG5rBHVxDe5lj2gfU28citvYBEaj1qq950HplgCqfFAlv9w/AitlrV7HUOIg==
+  version "7.4.2"
+  resolved "https://registry.yarnpkg.com/multiaddr/-/multiaddr-7.4.2.tgz#70021158dfcdc81d8e0e2664b82a7bc1b4c8dce2"
+  integrity sha512-XVwKgOzfKANw4cPT6xZ8oWMqFA1MJVXe2gI3YBdAk7Jf8jvcQM85ewkex9u523j1MZZGXr4LxUH2baJWS/B5SA==
   dependencies:
     buffer "^5.5.0"
     cids "~0.7.1"
     class-is "^1.1.0"
     is-ip "^3.1.0"
-    multibase "^0.6.0"
+    multibase "^0.7.0"
     varint "^5.0.0"
 
 multibase@^0.6.0, multibase@~0.6.0:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/multibase/-/multibase-0.6.1.tgz#b76df6298536cc17b9f6a6db53ec88f85f8cc12b"
   integrity sha512-pFfAwyTjbbQgNc3G7D48JkJxWtoJoBMaR4xQUOuB8RnCgRqaYmWNFeJTTvrJ2w51bjLq2zTby6Rqj9TQ9elSUw==
+  dependencies:
+    base-x "^3.0.8"
+    buffer "^5.5.0"
+
+multibase@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/multibase/-/multibase-0.7.0.tgz#1adfc1c50abe05eefeb5091ac0c2728d6b84581b"
+  integrity sha512-TW8q03O0f6PNFTQDvh3xxH03c8CjGaaYrjkl9UQPG6rz53TQzzxJVCIWVjzcbN/Q5Y53Zd0IBQBMVktVgNx4Fg==
   dependencies:
     base-x "^3.0.8"
     buffer "^5.5.0"

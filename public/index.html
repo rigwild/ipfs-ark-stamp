@@ -28,8 +28,7 @@
                     :state="!!newDocument"
                     placeholder="Select a file or drop it here..."
                     drop-placeholder="Drop a file..."
-                    :disabled="newDocumentIsLoading"
-                  >
+                    :disabled="newDocumentIsLoading">
                   </b-form-file>
                   <div v-if="newDocument" class="mt-3">
                     Selected file: {{ newDocument.name }}<br />
@@ -40,15 +39,11 @@
 
                 <b-btn type="submit" variant="primary">Add file</b-btn>
               </form>
-              <b-alert :show="newDocumentMessage" class="mt-2" variant="info" dismissible
-                >{{ newDocumentMessage }}</b-alert
-              >
+              <b-alert :show="newDocumentMessage" class="mt-2" variant="info" dismissible>{{ newDocumentMessage }}</b-alert>
             </b-card>
           </b-overlay>
 
-          <b-alert :show="stampedFilesTableMessage" class="my-2" variant="info" dismissible
-            >{{ stampedFilesTableMessage }}</b-alert
-          >
+          <b-alert :show="stampedFilesTableMessage" class="my-2" variant="info" dismissible>{{ stampedFilesTableMessage }}</b-alert>
 
           <b-overlay :show="stampedFilesTableStateIsLoading" rounded="sm">
             <div class="card mt-2">
@@ -59,24 +54,27 @@
                 <b-badge pill variant="info">{{ stampedFilesPinnedCount }} pinned</b-badge>
                 <b-badge pill variant="info">{{ stampedFilesStampedCount }} stamped</b-badge>
 
-                <b-button
-                  @click="loadIpfsStampedFiles"
-                  size="sm"
-                  variant="primary"
-                  class="ml-2"
-                  :disabled="stampedFilesTableStateIsLoading"
-                >
-                  Refresh
-                </b-button>
-                <b-button
-                  @click="synchronizeIpfsDb"
-                  size="sm"
-                  variant="light"
-                  class="ml-2"
-                  :disabled="stampedFilesTableStateIsLoading"
-                >
-                  Synchronize IPFS database
-                </b-button>
+                <b-overlay :show="stampedFilesTableStateIsLoading" rounded spinner-small class="d-inline-block">
+                  <b-button
+                    @click="loadIpfsStampedFiles"
+                    size="sm"
+                    variant="primary"
+                    class="ml-2"
+                    :disabled="stampedFilesTableStateIsLoading">
+                    Refresh
+                  </b-button>
+                </b-overlay>
+
+                <b-overlay :show="stampedFilesTableStateIsLoading" rounded spinner-small class="d-inline-block">
+                  <b-button
+                    @click="synchronizeIpfsDb"
+                    size="sm"
+                    variant="light"
+                    class="ml-2"
+                    :disabled="stampedFilesTableStateIsLoading">
+                    Synchronize IPFS database
+                  </b-button>
+                </b-overlay>
               </div>
               <b-table
                 show-empty
@@ -85,14 +83,14 @@
                 :sort-compare="stampedFilesTableCustomSort"
                 :items="ipfs.stampedFiles"
                 :fields="[
-                  { key: 'fullName', label: 'Name', sortable: true, class: 'align-middle' },
-                  { key: 'size', label: 'Size', sortable: true, formatter: value => `${value} MB`, class: 'align-middle' },
-                  { key: 'cid', label: 'CID', sortable: true, formatter: value => `https://gateway.pinata.cloud/ipfs/${value}`, class: 'align-middle' },
-                  { key: 'pin', label: 'Pin', sortable: true, class: 'text-center align-middle' },
-                  { key: 'ark', label: 'Stamp', sortable: true, class: 'text-center align-middle' },
-                  { key: 'delete', label: 'Delete', class: 'text-center align-middle' }
+                { key: 'fullName', label: 'Name', sortable: true, class: 'align-middle' },
+                { key: 'size', label: 'Size', sortable: true, formatter: value=> `${value} MB`, class: 'align-middle' },
+                { key: 'cid', label: 'CID', sortable: true, formatter: value => `https://gateway.pinata.cloud/ipfs/${value}`, class: 'align-middle' },
+                { key: 'pin', label: 'Pin', sortable: true, class: 'text-center align-middle' },
+                { key: 'ark', label: 'Stamp', sortable: true, class: 'text-center align-middle' },
+                { key: 'delete', label: 'Delete', class: 'text-center align-middle' }
                 ]"
-              >
+                >
                 <template v-slot:cell(fullName)="row">
                   <span :title="row.item.fullName">
                     {{ row.item.fullName.length > 20 ? `${row.item.fullName.slice(0, 20)}...` : row.item.fullName }}
@@ -103,17 +101,14 @@
                   <a
                     :href="`https://gateway.pinata.cloud/ipfs/${row.item.cid}`"
                     target="_blank"
-                    rel="noopener noreferrer"
-                    >{{ row.item.cid }}</a
-                  >
+                    rel="noopener noreferrer">{{ row.item.cid }}</a>
                 </template>
 
                 <template v-slot:cell(pin)="row">
                   <b-button
                     @click="setIpfsStampedFilePinState(row.item)"
                     size="sm"
-                    :variant="row.item.pinned ? 'success' : 'danger'"
-                  >
+                    :variant="row.item.pinned ? 'success' : 'danger'">
                     📌
                   </b-button>
                 </template>
@@ -128,8 +123,7 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     size="sm"
-                    variant="info"
-                  >
+                    variant="info">
                     🔎
                   </b-button>
                 </template>
@@ -147,9 +141,7 @@
         <footer class="mt-4 text-muted text-center">
           Made with 💖 by
           <a href="http://github.com/rigwild" target="_blank" rel="noopener noreferrer">rigwild</a><br />
-          <a href="http://github.com/rigwild/ipfs-ark-stamp" target="_blank" rel="noopener noreferrer"
-            >Available on GitHub</a
-          >
+          <a href="http://github.com/rigwild/ipfs-ark-stamp" target="_blank" rel="noopener noreferrer">Available on GitHub</a>
         </footer>
       </div>
     </div>
